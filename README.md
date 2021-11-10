@@ -3,7 +3,7 @@ Helm chart to deploy Jenkins server with NFS storage.
 
 # Introduction
 
-This [Helm](https://github.com/kubernetes/helm) chart installs [Jenkins](https://www.jenkins.io/) in a Kubernetes cluster.
+This [Helm](https://github.com/kubernetes/helm) chart installs [Jenkins](https://www.jenkins.io/) in a Kubernetes cluster. This chart expose by ClusterIP the JNLP port to use [Kubernetes](https://plugins.jenkins.io/kubernetes/) plugin.
 
 ## Prerequisites
 
