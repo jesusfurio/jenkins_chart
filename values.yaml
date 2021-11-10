@@ -1,0 +1,29 @@
+# Default values for mind-jenkins.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+namespace: "jenkins"
+domain: mydomain.com
+
+replicaCount: 1
+
+environment:
+  jenkinsName: "project_name"
+  jenkinsOpts: "jenkinsproject_name"
+  jenkinsVersion: "2.282"
+limits:
+  cpu: 0.5
+  memory: 5Gi
+requests:
+  cpu: 0.15
+  memory: 1Gi
+storage:
+  storageClassName: "storage_class_name"
+  fileServer: "NFS.mydomain.com"
+  nfsPath: "/jenkins_nfs_path"
+  capacityStorage: 10Gi
+  requestStorage: 10Gi
+
+
+
+
+

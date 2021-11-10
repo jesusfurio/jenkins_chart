@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ .Release.Name }}-jenkins-deploy
+    namespace: {{ .Values.namespace }}
+spec:
+    selector:
+      matchLabels:
+        {{- include "jenkins.matchlabels" . | indent 8 }}
+    replicas: {{ .Values.replicaCount }}
+    strategy:
+      type: RollingUpdate
+    template:
+      metadata:
+        labels:
+          {{- include "jenkins.labels" . | indent 10 }}
+      spec: 
+        serviceAccountName: jenkins
+        securityContext:
+          fsGroup: 1000 
+          runAsUser: 0
+        imagePullSecrets:
+            - name: regcred
+        containers:
+            - name: {{ .Release.Name }}-pod
+              image: jenkins/jenkins:{{ .Values.environment.jenkinsVersion }}
+              imagePullPolicy: Always
+              env:
+              - name: JENKINS_NAME
+                value: {{ .Values.environment.jenkinsName }}
+              - name: JENKINS_PORT
+                value: "8080"
+              - name: JENKINS_OPTS
+                value: "--prefix=/{{ .Values.environment.jenkinsOpts }} --logfile=/var/log/{{ .Values.environment.jenkinsOpts }}.log --sessionTimeout=1440 --sessionEviction=43200"
+              - name: JAVA_OPTS
+                value: "-Dorg.apache.commons.jelly.tags.fmt.timeZone=Europe/Madrid -Duser.timezone=Europe/Madrid"    
+              ports:
+                - name: jenkins-web
+                  containerPort: 8080
+                - name: jenkins-jnlp
+                  containerPort: 50000
+                - name: ssh
+                  containerPort: 22
+              livenessProbe:
+                httpGet:
+                  path: "{{ .Values.environment.jenkinsOpts }}/login"
+                  port: jenkins-web
+                initialDelaySeconds: 80
+                periodSeconds: 10
+                timeoutSeconds: 8
+                successThreshold: 1
+                failureThreshold: 12
+              readinessProbe:
+                httpGet:
+                  path: "{{ .Values.environment.jenkinsOpts }}/login"
+                  port: jenkins-web
+                initialDelaySeconds: 30
+                periodSeconds: 10
+                timeoutSeconds: 1
+                successThreshold: 1
+                failureThreshold: 3
+              volumeMounts:
+                - mountPath: /var/jenkins_home
+                  name: {{ .Release.Name }}-jenkins-home
+              resources:
+                limits:
+                  cpu: {{ .Values.limits.cpu }}
+                  memory: {{ .Values.limits.memory }}
+                requests:
+                  cpu: {{ .Values.requests.cpu }}
+                  memory: {{ .Values.requests.memory }}
+        volumes:
+            - name: {{ .Release.Name }}-jenkins-home
+              persistentVolumeClaim:
+                claimName: {{ .Release.Name }}-pvc

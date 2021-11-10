@@ -1,2 +1,2 @@
 # jenkins_chart
-Helm chart to deploy Jenkins server
+Helm chart to deploy Jenkins server with NFS storage.

@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-web
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "jenkins.labels" . | indent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: web
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    {{- include "jenkins.selector" . | indent 4 }}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-clusterip-master
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "jenkins.labels" . | indent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: "jnlp"
+      port: 50000
+      targetPort: 50000
+  selector:
+    {{- include "jenkins.selector" . | indent 4 }}

@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-ingress
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "jenkins.labels" . | indent 4 }}
+  annotations:
+    kubernetes.io/ingress.allow-http: "false"
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: 20m
+    nginx.ingress.kubernetes.io/secure-backends: "true"
+spec:
+  tls:
+  - hosts:
+    - {{ .Values.domain }}
+    secretName: cert
+  rules:
+    - host: {{ .Values.domain }}
+      http:
+        paths:
+          - path: /{{ .Values.environment.jenkinsOpts }}
+            backend:
+              serviceName: {{ .Release.Name }}-web
+              servicePort: 8080
